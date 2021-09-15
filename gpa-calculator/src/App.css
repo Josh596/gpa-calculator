@@ -1,38 +1,75 @@
-.App {
-  text-align: center;
+html,body,.App, #root{
+  width: 100%;
+  font-family: "Roboto Slab", "Times New Roman",'Segoe UI', 'Open Sans', 'Helvetica Neue', sans-serif;
+  height: 100%;
+}
+button{
+  color: blue !important;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.button-parent{
+  background-color: #eeeeee !important;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.title-div{
+  background: linear-gradient(180deg, #6DBCCD 0%, rgba(140, 138, 245, 0.78) 100%);
+  height: 35%;
+  color:white;
+  font-weight: 400;
+  position: relative;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.gpa-card-div{
+  position:absolute;
+  top: 80%;
+  width: 75%;
+  background-color: white;
+  color: black;
+  font-weight: 400;
 }
 
-.App-link {
-  color: #61dafb;
+.add_semester{
+  border-radius: 50% !important;
+  margin-left: 3px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.semester_btn{
+  border-radius: 22px !important;
+  padding-right: 25px;
+  padding-left: 25px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
+
+
+.semester_name{
+  font-weight: 700;
+  color: black;
+  padding: 20px;
+  border-bottom: 1px solid black;
+}
+
+
+.card-header-div{
+  background: #C4C4C4;
+}
+
+.border-right{
+  border-right: 1px solid;
+}
+
+.course-title{
+  border:none;
+  background: transparent;
+  display: inline-block;
+}
+
+.course-title:hover{
+  border: 1px solid black;
+}
+
+#course-credit{
+  max-width: 60px;
+}
+
