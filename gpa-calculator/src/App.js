@@ -17,8 +17,8 @@ import React from 'react';
 function Course(props){
   return(
     <tr>
-    <td>1</td>
-    <td><span contentEditable class="course-title">GEG 123</span></td>
+    <td>{props.id}</td>
+    <td>{<span contentEditable class="course-title">{props.title}</span>}</td>
     <td>
       <DropdownButton>
         <Dropdown.Item>A</Dropdown.Item>
@@ -36,38 +36,65 @@ function Course(props){
   )
 }
 
-function Semester(props){
-  return(
-    <>  
-    <div class="semester_name">SEMESTER 1</div>                      
-    <Row>
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Course Name or Code</th>
-            <th>Grade</th>
-            <th>Credits/Units</th>
-          </tr>
-        </thead>
-        <tbody>
-          <Course/>
-          <tr class="button-parent">
-            <td></td>
-            <td></td>
-            <td></td>
-            <td class="button-parent"><Button variant='light' className="add-course-btn">Add New Course</Button></td>
-          </tr>
-        </tbody>
-      </Table>
-    </Row> {/* Table */}
-    </>
-  )
+class Semester extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {
+      courses:[<Course id={1} title="GEG 123"/>], //Array of Course Components
+    }
+  }
+  handleClick(){
+    const id = this.state.courses.length + 1
+    const courses = this.state.courses.concat([<Course id={id} title={'GEG 123'}/>])
+    this.setState({
+      courses: courses
+    })
+  }
+  render(){
+    return(
+      <>  
+      <div class="semester_name">SEMESTER {this.props.semseter_id}</div>                      
+      <Row>
+        <Table striped bordered hover responsive>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Course Name or Code</th>
+              <th>Grade</th>
+              <th>Credits/Units</th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.state.courses.map((course) =>{
+              return course
+            })}
+
+            <tr class="button-parent">
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="button-parent"><Button variant='light' className="add-course-btn" onClick={()=>this.handleClick()}>Add New Course</Button></td>
+            </tr>
+          </tbody>
+        </Table>
+      </Row> {/* Table */}
+      </>
+    )
+  }
 }
 
 class App extends React.Component{
   constructor(props){
     super(props);
+    this.state = {
+      semesters:[<Semester id={1}/>]
+    }
+  }
+  handleClick(){
+    const id = this.state.semesters.length + 1
+    this.setState({
+      semesters: this.state.semesters.concat([<Semester id={id}/>])
+    })
   }
   render(){
     return (
@@ -106,11 +133,18 @@ class App extends React.Component{
               <div class="card-header-div">
                 <Container>
                   <Nav className="justify-content-end p-2">
+                    {
+                      this.state.semesters.map((semester)=>{
+                        return(
+                          <Nav.Item>
+                          <Button className="semester_btn">Semester {semester.props.id}</Button>
+                          </Nav.Item>
+                        )
+                      })
+
+                    }
                     <Nav.Item>
-                      <Button className="semester_btn">Semester 1</Button>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Button className="add_semester">+</Button>
+                      <Button onClick={()=>{this.handleClick()}} className="add_semester">+</Button>
                     </Nav.Item>
                   </Nav>
                 </Container>
