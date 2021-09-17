@@ -19,10 +19,10 @@ import React from 'react';
 function Course(props){
   return(
       <tr key={props.id}>
-        <td>{props.id}</td>
-        <td><input className="course-title" defaultValue={props.title}></input></td>
+        <td>{(props.id + 1)}</td>
+        <td><input className="course-title" placeholder={"Click to input course title"} defaultValue={props.title}></input></td>
         <td>
-          <Form.Select onChange={e=>props.onGradeChange(props.id, e.target.value)} bg="none" variant="none"  title="Grade">
+          <Form.Select onChange={e=>props.onGradeChange(props.id, e.target.value)} bg="none" value={props.grade} variant="none"  title="Grade">
             <option value={5}>A</option>
             <option value={4}>B</option>
             <option value={3}>C</option>
@@ -32,7 +32,7 @@ function Course(props){
           </Form.Select>
         </td>
         <td>
-          <input step={0.1} onInput={e=>props.onUnitChange(props.id, e.target.value)} id="course-credit" type="number"></input>
+          <input step={1} min={0} onInput={e=>props.onUnitChange(props.id, e.target.value)} value={props.unit} id="course-credit" type="number"></input>
         </td>
       </tr>
     
@@ -40,28 +40,12 @@ function Course(props){
 }
 
 class Semester extends React.Component{
-  constructor(props){
-    super(props);
-    const id = 1
-    this.state = {
-      courses:[<Course onUnitChange={(val)=>{this.onUnitChange(id,val)}} onGradeChange={(val)=>{this.onGradeChange(id,val)}} key={id} id={id} title="GEG 123"/>], //Array of Course Components
-    }
-  }
- 
-  
-
-  handleClick(){
-    const id = this.state.courses.length + 1
-    const courses = this.state.courses.concat([<Course onUnitChange={(val)=>{this.props.onUnitChange(val)}} onGradeChange={()=>{this.props.onGradeChange()}} key={id} id={id} title={'GEG 123'}/>])
-    this.setState({
-      courses: courses
-    })
-  }
+   
   render(){
-
+    const courses = this.props.courses;
     return(
       <>  
-      <div className="semester_name col-header">SEMESTER {this.props.id}</div>                      
+      <div className="semester_name col-header">SEMESTER {(this.props.id + 1)}</div>                      
       <Row>
         <Table striped bordered hover responsive>
           <thead>
@@ -73,15 +57,18 @@ class Semester extends React.Component{
             </tr>
           </thead>
           <tbody>
-            {this.state.courses.map((course) =>{
-              return course
+            {courses.map((course, i) =>{
+              return <Course key={i} id={i} title={course.title} 
+                      unit={course.unit} grade={course.grade} 
+                      onGradeChange={(course_id, grade)=>this.props.onGradeChange(this.props.id,course_id, grade)}
+                      onUnitChange={(course_id, unit)=>this.props.onUnitChange(this.props.id,course_id, unit)}/>
             })}
 
             <tr className="button-parent">
               <td></td>
               <td></td>
               <td></td>
-              <td className="button-parent"><Button variant='light' className="add-course-btn" onClick={()=>this.handleClick()}>Add New Course</Button></td>
+              <td className="button-parent"><Button variant='light' className="add-course-btn" onClick={()=>this.props.addCourse(this.props.id)}>Add New Course</Button></td>
             </tr>
           </tbody>
         </Table>
@@ -94,46 +81,127 @@ class Semester extends React.Component{
 class App extends React.Component{
   constructor(props){
     super(props);
-    const id = 1
+    const id = 0
     this.state = {
-      semesters:[<Semester onUnitChange={(val)=>{this.onUnitChange(val)}} onGradeChange={(val)=>{this.onGradeChange(val)}} key={id} id={id}/>],
-      semester_key: id,
+      semesters:[{
+        courses:[{
+          title:"",
+          unit:0,
+          grade:5,
+        }],
+        gpa: 0,
+        total_credit_unit:0,
+        total_quality_point:0,
+      }],
+
+      active_semester_key: id,
     }
   }
+  //When I add the course delete function,
+  //When a course is deleted, change the props id to it's current place
+  //on the table
+  addCourse(sem_id){
+    const semesters = this.state.semesters.slice();
+    const semester = semesters[sem_id]
 
-  onUnitChange(val){
-    console.log(val)
+    const courses = semester.courses.concat([{
+                    title:"",
+                    unit:0,
+                    grade:5,
+                  }]);
+    semester.courses = courses;
+
+    this.setState({
+      semesters: semesters
+    })
   }
 
-  onGradeChange(val){
-    console.log(val)
+  handleUnitChange(semester_id,course_id, unit){
+    const semesters = this.state.semesters.slice(); //Returns course
+    const semester = semesters[semester_id]
+    const courses = semester.courses
+    const course = courses[course_id]
+    course.unit = unit
+
+    const gpa = this.getSemesterGpa(courses)
+    
+    semester.gpa = gpa.result || 0
+    semester.total_credit_unit = gpa.total_credit_unit
+    semester.total_quality_point = gpa.total_quality_point
+    this.setState({
+      semesters: semesters
+    })
+
   }
+
+  handleGradeChange(semester_id,course_id, grade){
+    const semesters = this.state.semesters.slice(); //Returns course
+    const semester = semesters[semester_id]
+    const courses = semester.courses
+    const course = courses[course_id]
+    course.grade = grade
+
+    const gpa = this.getSemesterGpa(courses)
+    semester.gpa = gpa.result || 0 //Using .toString, incase of NaN Value
+    semester.total_credit_unit = gpa.total_credit_unit.toString()
+    semester.total_quality_point = gpa.total_quality_point.toString()
+    this.setState({
+      semesters: semesters
+    })
+
+  }
+
+
 
   createNewSemester(){
-    const id = this.state.semesters.length + 1
-    const semester = <Semester onGradeChange={()=>{this.onGradeChange()}} key={id} id={id}/>
+    const id = this.state.semesters.length
+    const semesters = this.state.semesters.slice();      
     this.setState({
-      semesters: this.state.semesters.concat([semester]),
-      semester_key:id,
-    })
+      semesters: semesters.concat([{
+        courses: [{
+          title:"",
+          unit:0,
+          grade:5,
+        }],
+        gpa: 0,
+        total_credit_unit:0,
+        total_quality_point:0,
+      }]),
+      active_semester_key: id,
+    });
   }
 
   setActiveSemester(event){
     const id = event.target.value;
     this.setState({
-      semester_key:id,
+      active_semester_key:id,
     })
   }
 
   getSemesterGpa(courses){
+    let total_credit_unit = 0
     let total_quality_point = 0
     courses.forEach((course)=>{
-      const grade = course.state.grade;
-      const unit = course.state.unit;
+      const grade = parseInt(course.grade);
+      const unit = parseFloat(course.unit);
       const quality_point = grade * unit;
-      total_quality_point += quality_point ;
+      total_quality_point += quality_point;
+      total_credit_unit += unit;
     })
-    return total_quality_point
+
+    const result_gpa = total_quality_point/total_credit_unit;
+    return {result:result_gpa, total_quality_point:total_quality_point, total_credit_unit:total_credit_unit}
+  }
+
+  getCumulativeGpa(){
+    let total_quality_point = 0;
+    let total_credit_unit = 0;
+    this.state.semesters.forEach(semester=>{
+      total_credit_unit += semester.total_credit_unit;
+      total_quality_point += semester.total_quality_point;
+    })
+    let cgpa = (total_quality_point/total_credit_unit) || 0;
+    return (cgpa)
   }
 
   render(){
@@ -160,15 +228,19 @@ class App extends React.Component{
             <h2>GPA CALCULATOR</h2>
             <h5>Calculate Semester GPA and Cumulative GPA</h5>
             <div className="gpa-card-div">
-              <TabContainer activeKey={this.state.semester_key} defaultActiveKey={1}>
+              <TabContainer activeKey={this.state.active_semester_key} defaultActiveKey={1}>
                 <Row>
                   
                   <Col sm={9} className="border-right"> {/*GPA CALCULATION */}
-                    {this.state.semesters.map((semester)=>{
+                    {this.state.semesters.map((semester, i)=>{ 
+                      //Index will be preserved, so key=index
                       return(
-                        <Tab.Content key={semester.props.id}>
-                          <Tab.Pane eventKey={semester.props.id}>
-                            {semester}
+                        <Tab.Content key={i}>
+                          <Tab.Pane eventKey={i}>
+                            <Semester id={i} courses={semester.courses} 
+                            addCourse={(sem_id)=>{this.addCourse(sem_id)}} 
+                            onGradeChange={(sem_id, course_id, grade)=>this.handleGradeChange(sem_id, course_id, grade)}
+                            onUnitChange={(sem_id, course_id, unit)=>this.handleUnitChange(sem_id, course_id, unit)}/>
                           </Tab.Pane>
                         </Tab.Content>
                       )
@@ -185,13 +257,14 @@ class App extends React.Component{
                       
                     <Row>
                       <Col sm={9}>Cumulative</Col>
-                      <Col>4.95</Col>
+                      {this.getCumulativeGpa().toFixed(2)}/5
+                      <Col></Col>
                     </Row>
-                    {this.state.semesters.map((semester)=>{
+                    {this.state.semesters.map((semester, i)=>{
                       return(
                         <Row>
-                          <Col sm={9}>{'Semester' + semester.props.id}</Col>
-                          <Col>4.75</Col>
+                          <Col sm={9}>{'Semester ' + (i+1)}</Col>
+                          <Col>{semester.gpa.toFixed(2)}/5</Col>
                         </Row>
                       )
                     })}
@@ -205,10 +278,10 @@ class App extends React.Component{
                   <Container>
                     <Nav className="justify-content-start p-2">
                       {
-                        this.state.semesters.map((semester)=>{
+                        this.state.semesters.map((semester, i)=>{
                           return(
-                            <Nav.Item key={semester.props.id}>
-                              <Nav.Link onClick={(e)=>this.setActiveSemester(e)} value={semester.props.id} eventKey={semester.props.id} className="semester_btn">Semester {semester.props.id}</Nav.Link>
+                            <Nav.Item key={i}>
+                              <Nav.Link onClick={(e)=>this.setActiveSemester(e)} value={i} eventKey={i} className="semester_btn">Semester {i+1}</Nav.Link>
                             </Nav.Item>
                           )
                         })
