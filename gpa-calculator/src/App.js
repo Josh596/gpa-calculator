@@ -250,24 +250,34 @@ class App extends React.Component{
                     
 
                   <Col>
-                    <div className="col-header"></div>
-                    <Row>
-                      Cumulative GPA
-                    </Row>
+                  <div className="col-header results-header">RESULTS</div>
+                    <Table striped bordered hover responsive>
+                      <thead>
+                        <tr>
+                          <th>Cumulative GPA</th> {/*Semester */}
+                          <th> </th> {/*Result */}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Cumulative GPA</td>
+                          <td>{this.getCumulativeGpa().toFixed(2)}/5</td>
+                        </tr>
+                        {this.state.semesters.map((semester, i)=>{
+                          return(
+                            <>
+                            <tr key={i}>
+                              <td>{'Semester ' + (i+1)}</td>
+                              <td>{semester.gpa.toFixed(2)}/5</td>
+                            </tr>
+                            </>
+                          )
+                        })}
+
+                      </tbody>
+                        
                       
-                    <Row>
-                      <Col sm={9}>Cumulative</Col>
-                      {this.getCumulativeGpa().toFixed(2)}/5
-                      <Col></Col>
-                    </Row>
-                    {this.state.semesters.map((semester, i)=>{
-                      return(
-                        <Row>
-                          <Col sm={9}>{'Semester ' + (i+1)}</Col>
-                          <Col>{semester.gpa.toFixed(2)}/5</Col>
-                        </Row>
-                      )
-                    })}
+                    </Table>
 
                   </Col> {/* RESULT DISPLAYED */}
                 </Row>
